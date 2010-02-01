@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Mark content as offensive.{% endblock %}
+
+{% block customCSS %}
+	<link href="{{ MEDIA_URL }}css/story/.css" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block featured %}
+	<div id="story-wrapper" class="roundedbottom">
+		<div id="comments-form">
+                    <h3>Mark <a href="{{ content.get_absolute_url }}">{{ content.comment }}</a> as offensive.</h3>
+                    
+                    {% if message %}
+                    {{ message }}
+                    {% endif %}
+                    
+                    {% if form %}
+                        {% if form.errors %}{{ form.errors }}{% endif %}
+                        <form method="POST">
+                        <label for="id_description">Describe below</label>{{ form.description }}
+                        <input type="hidden" name="site" value="{{ site_id }}" />
+                        <input type="hidden" name="user" value="{{ user.id }}" />
+                        <input type="hidden" name="content_type" value="{{ content_type_id }}" />
+                        <input type="hidden" name="object_id" value="{{ content.id }}" />
+                        <input type="submit" value="Submit" />
+                        </form>
+                    {% endif %}
+		</div>
+	</div>
+{% endblock %}
+
+
