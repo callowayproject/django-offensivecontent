@@ -1,81 +1,48 @@
+import datetime, random
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.contrib.auth.models import User
-try:
-    from core import logger
-except:
-    import logging as logger
+from django.utils.translation import ugettext as _
+from django.contrib.contenttypes import generic
+from django.core.cache import cache
+from django.conf import settings
 
 class OffensiveContent(models.Model):
     """
-    A way to retain data about Offensive User Content on the Site.
+    A content object that has been marked as offensive
     """
+    content_type = models.ForeignKey(ContentType, 
+        verbose_name=_('Content Type'))
+    object_id = models.IntegerField(_('Object ID'))
+    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    is_safe = models.BooleanField(_('Is Safe'), default=False, 
+        help_text=_('If True this peice of content has be verified not to be offensive.'))
+    notes = models.TextField(_('Notes'), null=True, blank=True, 
+        help_text=_('Some notes about this peice of content.'))
     site = models.ForeignKey(Site)
-    content_type = models.ForeignKey(ContentType)
-    object_id = models.IntegerField()
-    user = models.ForeignKey(User)
-    description = models.TextField(blank=True, null=True)
-    published_date = models.DateField(auto_now_add=True)
-    is_safe = models.BooleanField(default=False)
+    latest = models.DateTimeField(auto_now=True)
     
     class Meta:
-        unique_together = ("site", "content_type", "object_id", "user")
+        unique_together = ("site", "content_type", "object_id",)
+        ordering = ('-latest',)
 
     def __unicode__(self):
-        return unicode(self.get_content_instance())
+        return unicode(self.content_object)
+        
     
-    def get_absolute_url(self):
-        return self.get_content_instance().get_absolute_url()
-
-    def get_content_instance(self):
-        """
-        Shortcut to get the actual Instance of the piece of Content
-        specified by content_type and object_id.
-        """
-        try:
-            return self.content_type.get_object_for_this_type(pk=self.object_id)
-        except self.content_type.DoesNotExist:
-            logger.error("Offensive Content %d references a missing piece of content." % self.id)
-            return None
-
-    def view_content(self):
-        """
-        Returns link to view offensive content.
-        """
-        ci = self.get_content_instance()
-        return '<a href="/admin/%s/%s/%d/">View Content</a>' % (ci._meta.app_label, ci._meta.module_name, ci.id)
-    view_content.allow_tags = True
-    view_content.is_safe = True
+class OffensiveContentData(models.Model):
+    """
+    Information about the user that marked content as offensive
+    """
+    offensive_content = models.ForeignKey(OffensiveContent)
+    user = models.ForeignKey(User)
+    comment = models.TextField(blank=True, null=True)
+    pub_date = models.DateField(default=datetime.datetime.now)
     
-    def remove_content(self):
-        """
-        Returns link to remove offensive content.
-        """
-        return '<a href="/admin/offensivecontent/manage/remove_content/%d/">Remove Content</a>' % self.id
-    remove_content.allow_tags = True
-    remove_content.is_safe = True
+    def __unicode__(self):
+        return "%s - %s" % (self.offensive_content, self.user)
+        
+    class Meta:
+        ordering = ('-pub_date',)
     
-    def remove_user_content(self):
-        """
-        Returns link to remove all user's submitted content.
-        """
-        return '<a href="/admin/offensivecontent/manage/remove_user_content/%d/">Remove User Content</a>' % self.id
-    remove_user_content.allow_tags = True
-    remove_user_content.is_safe = True
-    
-    def mark_content_safe(self):
-        """
-        Returns link to mark content as safe so other reports can not be filed.
-        """
-        return '<a href="/admin/offensivecontent/manage/mark_content_safe/%d/">Mark Content Safe</a>' % self.id
-    mark_content_safe.allow_tags = True
-    mark_content_safe.is_safe = True
-    
-    def disable_user(self):
-        """
-        Returns link to disable user and remove all user's submitted content.
-        """
-        return '<a href="/admin/offensivecontent/manage/disable_user/%d/">Disable User and Remove all User\'s Content</a>' % self.id
-    disable_user.allow_tags = True
-    disable_user.is_safe = True

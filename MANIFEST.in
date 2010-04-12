@@ -1,0 +1,4 @@
+include README
+include LICENSE
+
+recursive-include offensivecontent *.html *.png *.gif *.js *.css
