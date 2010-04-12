@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>You are marking this {{ ctype }} as offensive</h2>
+<strong>{{ obj }}</strong>
+<hr/>
+<form action="." method="post" accept-charset="utf-8">
+    {{ form }}
+    <p><input type="submit" value="Continue &rarr;"></p>
+</form>
+
+{% endblock %}
