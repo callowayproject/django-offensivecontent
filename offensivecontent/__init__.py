@@ -17,4 +17,7 @@ def get_version():
 
 __version__ = get_version()
 
-from controllers import registry
+try:
+    from controllers import registry
+except ImportError:
+    pass
