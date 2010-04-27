@@ -1,0 +1,4 @@
+<a href="{{ content_admin_url }}" target="_blank"><img src="{{ STATIC_URL }}images/icons/page_magnify.png" title="View content" alt="View content" width="16" height="16"></a>
+<a href="{% url offensivecontent_disable_content content_type_id=object.content_type.id object_id=object.object_id %}"><img src="{{ STATIC_URL }}images/icons/decline.png" title="Mark content as offensive" alt="Mark offensive" width="16" height="16"></a>
+<a href="{% url offensivecontent_mark_safe content_type_id=object.content_type.id object_id=object.object_id %}"><img src="{{ STATIC_URL }}images/icons/accept.png" title="Mark content as safe" alt="Mark Safe" width="16" height="16"></a>
+<a href="{% url offensivecontent_disable_user content_type_id=object.content_type.id object_id=object.object_id %}"><img src="{{ STATIC_URL }}images/icons/user_cross.png" title="Disable User" alt="Disable User" width="16" height="16"></a>

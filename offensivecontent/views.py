@@ -64,7 +64,7 @@ def add(request, content_type_id, object_id,
 
 
 @staff_member_required
-def mark_safe(request, content_type_id, object_id, 
+def mark_safe(request, content_type_id, object_id, is_safe=False
     template_name='offensivecontent/admin/confirm_form.html'):
     
     ctype = get_object_or_404(ContentType, pk=content_type_id)
