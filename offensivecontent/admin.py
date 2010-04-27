@@ -23,11 +23,12 @@ class OffensiveContentDataInline(admin.TabularInline):
     
 
 class OffensiveContentAdmin(admin.ModelAdmin):
-    list_display = ('__unicode__', 'is_safe', 'number_of_submitters', 
-        'is_content_enabled', 'is_content_user_enabled', 'latest')
+    list_display = ('__unicode__', 'number_of_submitters', 'latest', 'moderator_actions')
     inlines = [OffensiveContentDataInline,]
     actions = ['disable_content', 'enable_content', 'disable_user', 
         'enable_user', 'mark_safe', 'mark_unsafe']
+    date_hierarchy = "latest"
+    list_filter = ["is_safe","content_type"]
     
     def number_of_submitters(self, obj):
         return str(OffensiveContentData.objects.filter(offensive_content__pk=obj.pk).count())

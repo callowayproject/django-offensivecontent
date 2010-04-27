@@ -1,8 +1,8 @@
-from django.views.generic.create_update import create_object
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.sites.models import Site
 from django.contrib.admin.views.decorators import staff_member_required 
 from django.conf import settings
@@ -64,19 +64,17 @@ def add(request, content_type_id, object_id,
 
 
 @staff_member_required
-def mark_safe(request, content_type_id, object_id, is_safe=False
+def mark_safe(request, object_id, is_safe=False,
     template_name='offensivecontent/admin/confirm_form.html'):
+    oc = get_object_or_404(OffensiveContent, pk=object_id)
     
-    ctype = get_object_or_404(ContentType, pk=content_type_id)
-    obj = get_object_or_404(ctype.model_class(), pk=object_id)
-    oc = get_object_or_404(OffensiveContent, 
-        content_type__pk=content_type_id,
-        object_id=object_id)
+    ctype = oc.content_type
+    obj = oc.object_id
     
     if request.method == "POST":
         if "confirm" in request.POST:
             controller = registry.get_controller_for_model(ctype.model_class())
-            controller.enable_content(ctype.get_object_for_this_type(pk=object_id))
+            controller.enable_content(oc.content_object)
             oc.is_safe = True
             oc.save()
             
@@ -93,26 +91,31 @@ MESSAGES = {
 }
 
 @staff_member_required
-def content_cotroller(request, content_type_id, object_id, 
+def content_cotroller(request, object_id, 
     template_name="offensivecontent/admin/confirm_form.html", method=None):
-    
-    ctype = get_object_or_404(ContentType, pk=content_type_id)
-    obj = get_object_or_404(ctype.model_class(), pk=object_id)
-    
-    try:
-        ctype = ContentType.objects.get(pk=content_type_id)
-    except ContentType.DoesNotExist:
-        raise Http404
+    ocontent = OffensiveContent.objects.get(pk=object_id)
         
     if request.method == "POST":
         if "confirm" in request.POST:
-            controller = registry.get_controller_for_model(ctype.model_class())
-            getattr(controller, method)(ctype.get_object_for_this_type(pk=object_id))
-            # TODO reirect
+            controller = registry.get_controller_for_model(ocontent.content_type.model_class())
+            getattr(controller, method)(ocontent.content_object)
+            if method == 'disable_content' or method == 'disable_user':
+                ocontent.is_safe=False
+            elif method == 'enable_content' or method == 'disable_user':
+                ocontent.is_safe=True
+            ocontent.save()
+            if REDIRECT_FIELD_NAME in request.POST:
+                return HttpResponseRedirect(request.POST[REDIRECT_FIELD_NAME])
+            else:
+                return HttpResponseRedirect("/admin/")
             
+    if REDIRECT_FIELD_NAME in request.GET:
+        redirect = '<input type="hidden" name="%s" value="%s">' % (REDIRECT_FIELD_NAME, request.GET[REDIRECT_FIELD_NAME])
+    else:
+        redirect = '/admin/'
     return render_to_response(template_name,
-                              {'ctype': ctype,
-                               'obj': obj,
-                               'message': MESSAGES[method]},
+                              {'obj': ocontent.content_object,
+                               'message': MESSAGES[method],
+                               'redirect': redirect,},
                               context_instance=RequestContext(request))
                               
