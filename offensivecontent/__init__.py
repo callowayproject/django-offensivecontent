@@ -18,6 +18,6 @@ def get_version():
 __version__ = get_version()
 
 try:
-    from controllers import registry
+    from registry import registry
 except ImportError:
     pass

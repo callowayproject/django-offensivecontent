@@ -1,9 +1,10 @@
 {% extends "admin/base_site.html" %}
 
 {% block content %}
-    {{ message }}<br/>
-    {{ obj }}<br/>
+    <p class="alert">{{ message }}</p>
+    <p>{{ obj }}</p>
     <form action="." method="post" accept-charset="utf-8">
+        {{redirect|safe}}
         <p><input type="submit" id="confirm" name="confirm" value="Confirm"></p>
     </form>
 {% endblock %}
