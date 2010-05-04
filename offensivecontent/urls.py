@@ -10,6 +10,11 @@ urlpatterns = patterns('offensivecontent.views',
         name = 'oc_add',
     ),
     url(
+        regex = r'^(?P<content_type_id>\d+)/(?P<object_id>\d+)/add_ajax/$', 
+        view = 'add_ajax',
+        name = 'oc_add_ajax',
+    ),
+    url(
         regex = r'^(?P<object_id>\d+)/disable/$', 
         view = 'content_cotroller', 
         kwargs = {'method': 'disable_content'},

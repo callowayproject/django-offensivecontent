@@ -6,7 +6,8 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.sites.models import Site
 from django.contrib.admin.views.decorators import staff_member_required 
 from django.conf import settings
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.utils import simplejson
 
 from offensivecontent import registry
 from offensivecontent.models import OffensiveContent, OffensiveContentData
@@ -21,6 +22,27 @@ def _user_has_marked(user, content_type_id, object_id):
         return True
     except OffensiveContentData.DoesNotExist, OffensiveContentData.MultipleObjectsReturned:
         return False
+
+@login_required
+def add_ajax(request, content_type_id, object_id):
+    if not request.is_ajax():
+        return HttpResponseRedirect("/")
+        
+    if _user_has_marked(request.user, content_type_id, object_id):
+        return HttpResponse(content=simplejson.dumps({'result': False}))
+        
+    ctype = get_object_or_404(ContentType, pk=content_type_id)
+    site = get_object_or_404(Site, pk=settings.SITE_ID)
+    obj = get_object_or_404(ctype.model_class(), pk=object_id)
+    
+    oc, created = OffensiveContent.objects.get_or_create(
+        content_type=ctype, object_id=object_id, site=site)
+        
+    ocd = OffensiveContentData(user=request.user, offensive_content=oc)
+    ocd.save()
+    return HttpResponse(content=simplejson.dumps({'result': True}))
+        
+    
 
 @login_required
 def add(request, content_type_id, object_id, 
