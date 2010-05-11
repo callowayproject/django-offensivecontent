@@ -43,7 +43,7 @@ urlpatterns = patterns('offensivecontent.views',
         name = "oc_enable_user"
     ),
     url(
-        regex = r'^/(?P<object_id>\d+)/mark_safe/$', 
+        regex = r'^(?P<object_id>\d+)/mark_safe/$', 
         view = 'mark_safe',
         kwargs = {'is_safe': True,},
         name = "oc_mark_safe",
