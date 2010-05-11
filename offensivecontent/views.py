@@ -99,10 +99,21 @@ def mark_safe(request, object_id, is_safe=False,
             controller.enable_content(oc.content_object)
             oc.is_safe = True
             oc.save()
-            
+            if REDIRECT_FIELD_NAME in request.POST:
+                return HttpResponseRedirect(request.POST[REDIRECT_FIELD_NAME])
+            else:
+                return HttpResponseRedirect("/admin/")
+    
+    if REDIRECT_FIELD_NAME in request.GET:
+        redirect = '<input type="hidden" name="%s" value="%s">' % (REDIRECT_FIELD_NAME, request.GET[REDIRECT_FIELD_NAME])
+    else:
+        redirect = '/admin/'
+    
     return render_to_response(template_name,
-                              {'ctype': ctype,
-                               'obj': obj},
+                              {'message': "Are you sure you want to mark this content as safe?",
+                              'ctype': ctype,
+                               'obj': oc.content_object,
+                               'redirect': redirect},
                               context_instance=RequestContext(request))
 
 MESSAGES = {
