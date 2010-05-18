@@ -1,7 +1,10 @@
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import admin
 from offensivecontent.models import OffensiveContent, OffensiveContentData
-from offensivecontent import registry
+try:
+    from offensivecontent import registry
+except ImportError:
+    from registration import registry
 
 def _do_action(modeladmin, request, queryset, method):
     for oc in queryset:

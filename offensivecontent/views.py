@@ -9,7 +9,11 @@ from django.conf import settings
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.utils import simplejson
 
-from offensivecontent import registry
+try:
+    from offensivecontent import registry
+except ImportError:
+    from registration import registry
+
 from offensivecontent.models import OffensiveContent, OffensiveContentData
 from offensivecontent.forms import MarkForm
 
