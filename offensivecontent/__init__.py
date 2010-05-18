@@ -1,7 +1,7 @@
 __version_info__ = {
     'major': 0,
     'minor': 2,
-    'micro': 4,
+    'micro': 5,
     'releaselevel': 'final',
     'serial': 0
 }
@@ -18,6 +18,6 @@ def get_version():
 __version__ = get_version()
 
 try:
-    from registry import registry
+    from registration import registry
 except ImportError:
     pass
