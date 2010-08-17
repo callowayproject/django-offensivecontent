@@ -1,7 +1,7 @@
 __version_info__ = {
     'major': 0,
     'minor': 2,
-    'micro': 6,
+    'micro': 7,
     'releaselevel': 'final',
     'serial': 0
 }
@@ -19,5 +19,5 @@ __version__ = get_version()
 
 try:
     from registration import registry
-except ImportError:
+except:
     pass
