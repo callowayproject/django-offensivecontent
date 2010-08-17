@@ -19,5 +19,5 @@ __version__ = get_version()
 
 try:
     from registration import registry
-except ImportError:
+except:
     pass
