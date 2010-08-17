@@ -1,5 +1,6 @@
-from django.contrib.contenttypes.models import ContentType
 from django.contrib import admin
+from django.contrib.comments.models import Comment
+from django.contrib.contenttypes.models import ContentType
 from offensivecontent.models import OffensiveContent, OffensiveContentData
 try:
     from offensivecontent import registry
@@ -26,12 +27,18 @@ class OffensiveContentDataInline(admin.TabularInline):
     
 
 class OffensiveContentAdmin(admin.ModelAdmin):
-    list_display = ('__unicode__', 'is_safe', 'number_of_submitters', 'latest', 'moderator_actions')
+    list_display = ('get_content_text', 'is_safe', 'number_of_submitters', 'latest', 'moderator_actions')
     inlines = [OffensiveContentDataInline,]
     actions = ['disable_content', 'enable_content', 'disable_user', 
         'enable_user', 'mark_safe', 'mark_unsafe']
     date_hierarchy = "latest"
     list_filter = ["is_safe","content_type"]
+    
+    def get_content_text(self, obj):
+        if isinstance(obj.content_object, Comment):
+            return "%s: %s" % (obj.content_object.name, obj.content_object.comment)
+        return obj.content_object
+    get_content_text.short_description = "Content Text"
     
     def number_of_submitters(self, obj):
         return str(OffensiveContentData.objects.filter(offensive_content__pk=obj.pk).count())
