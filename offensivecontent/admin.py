@@ -33,6 +33,7 @@ class OffensiveContentAdmin(admin.ModelAdmin):
         'enable_user', 'mark_safe', 'mark_unsafe']
     date_hierarchy = "latest"
     list_filter = ["is_safe","content_type"]
+    actions_on_bottom = True
     
     def get_content_text(self, obj):
         if isinstance(obj.content_object, Comment):
